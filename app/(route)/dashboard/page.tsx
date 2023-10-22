@@ -1,11 +1,11 @@
-import CategoryList from '@/components/categori-list';
 import Post from '@/components/post';
 import { postsData } from '@/data';
+import Link from 'next/link';
 
-export default function Home() {
+const Dashboard = () => {
    return (
-      <>
-         <CategoryList />
+      <div>
+         <h1 className='mt-8 text-2xl font-bold'>My Post</h1>
          {postsData && postsData.length > 0 ? (
             postsData.map((post) => (
                <Post
@@ -22,8 +22,15 @@ export default function Home() {
                />
             ))
          ) : (
-            <div className='py-6'>No posts to display</div>
+            <div className='py-6'>
+               No posts created yet.{' '}
+               <Link className='underline' href={'/create-post'}>
+                  Create New
+               </Link>
+            </div>
          )}
-      </>
+      </div>
    );
-}
+};
+
+export default Dashboard;
