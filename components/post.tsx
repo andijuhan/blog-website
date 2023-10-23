@@ -65,10 +65,7 @@ const Post = ({
                {links.map((link, index) => (
                   <div key={index} className='flex gap-2 items-center'>
                      <HiLink size={25} />
-                     <Link
-                        className='text-[#7563DF] font-bold max-w-full overflow-hidden text-ellipsis'
-                        href={link}
-                     >
+                     <Link className='link' href={link}>
                         {link}
                      </Link>
                   </div>
