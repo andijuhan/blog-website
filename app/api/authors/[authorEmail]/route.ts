@@ -6,7 +6,7 @@ export const GET = async (
    { params }: { params: { authorEmail: string } }
 ) => {
    try {
-      const postAuthor = await prismadb.user.findMany({
+      const postAuthor = await prismadb.user.findUnique({
          where: {
             email: params.authorEmail,
          },

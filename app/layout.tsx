@@ -4,6 +4,7 @@ import './globals.css';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 import { NextAuthProvider } from '@/components/providers';
+import ToastProvider from '@/providers/toast-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,6 +21,7 @@ export default function RootLayout({
    return (
       <html lang='en'>
          <body className={inter.className}>
+            <ToastProvider />
             <NextAuthProvider>
                <div className='lg:max-w-[900px] px-8 lg:px-16 mx-auto py-8 shadow-xl min-h-screen flex flex-col'>
                   <Navbar />

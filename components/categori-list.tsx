@@ -1,7 +1,22 @@
-import { categoriesData } from '@/data';
 import Link from 'next/link';
+import { TCategory } from '@/types';
 
-const CategoryList = () => {
+const getCategories = async (): Promise<TCategory[] | null> => {
+   try {
+      const res = await fetch(`${process.env.NEXTAUTH_URL}/api/categories`);
+      if (res.ok) {
+         const categories = await res.json();
+         return categories;
+      }
+   } catch (error) {
+      console.log(error);
+   }
+   return null;
+};
+
+const CategoryList = async () => {
+   const categoriesData = await getCategories();
+
    return (
       <div className='flex gap-2 text-sm flex-wrap'>
          {categoriesData &&
@@ -9,9 +24,9 @@ const CategoryList = () => {
                <Link
                   className='px-4 py-1 rounded-md bg-slate-800 text-white cursor-pointer'
                   key={category.id}
-                  href={`/categories/${category.name}`}
+                  href={`/categories/${category.catName}`}
                >
-                  {category.name}
+                  {category.catName}
                </Link>
             ))}
       </div>

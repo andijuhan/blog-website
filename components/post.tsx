@@ -2,6 +2,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { HiLink } from 'react-icons/hi2';
 import DeleteButton from './delete-button';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { readingTime } from 'reading-time-estimator';
 
 interface PostProps {
    id: string;
@@ -15,7 +18,7 @@ interface PostProps {
    category?: string;
 }
 
-const Post = ({
+const Post = async ({
    id,
    author,
    date,
@@ -26,12 +29,22 @@ const Post = ({
    links,
    category,
 }: PostProps) => {
-   const isEditable = true;
+   const session = await getServerSession(authOptions);
+   const isEditable = session && session?.user?.email === authorEmail;
+   const dateObject = new Date(date);
+   const options: Intl.DateTimeFormatOptions = {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+   };
+   const formattedDate = dateObject.toLocaleDateString('en-US', options);
+   const contentReading = readingTime(content, 10);
 
    return (
       <div className='my-4 py-8 border-b border-b-300'>
          <div className='mb-4'>
-            Posted by: <span className='font-bold'>{author}</span> on {date}
+            Posted by: <span className='font-bold'>{author}</span> on{' '}
+            {formattedDate} - {contentReading.words} words {contentReading.text}
          </div>
          <div className='w-full h-72 relative'>
             {thumbnail ? (
@@ -76,7 +89,7 @@ const Post = ({
          {isEditable && (
             <div className='flex gap-3 font-bold py-2 px-4 rounded-md bg-slate-200 w-fit'>
                <Link href={`/edit-post/${id}`}>Edit</Link>
-               <DeleteButton />
+               <DeleteButton postId={id} />
             </div>
          )}
       </div>

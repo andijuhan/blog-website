@@ -1,5 +1,7 @@
 import prismadb from '@/lib/prismadb';
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../auth/[...nextauth]/route';
 
 export const GET = async () => {
    try {
@@ -24,10 +26,16 @@ export const GET = async () => {
 };
 
 export const POST = async (req: Request) => {
+   const session = await getServerSession(authOptions);
+
+   if (!session) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+   }
+
    const { title, content, links, selectedCategory, imageUrl, publicId } =
       await req.json();
 
-   const authorEmail = 'andijuhandi.4@gmail.com';
+   const authorEmail = session?.user?.email as string;
 
    if (!title || !content) {
       return new NextResponse('Title & content are required', { status: 500 });

@@ -1,5 +1,7 @@
 import prismadb from '@/lib/prismadb';
+import { getServerSession } from 'next-auth/next';
 import { NextResponse } from 'next/server';
+import { authOptions } from '../../auth/[...nextauth]/route';
 
 export const GET = async (
    req: Request,
@@ -30,6 +32,12 @@ export const PUT = async (
    req: Request,
    { params }: { params: { postId: string } }
 ) => {
+   const session = await getServerSession(authOptions);
+
+   if (!session) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+   }
+
    const { title, content, links, selectedCategory, imageUrl, publicId } =
       await req.json();
 
@@ -63,6 +71,12 @@ export const DELETE = async (
    req: Request,
    { params }: { params: { postId: string } }
 ) => {
+   const session = await getServerSession(authOptions);
+
+   if (!session) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+   }
+
    try {
       const updatedPost = await prismadb.post.delete({
          where: {
