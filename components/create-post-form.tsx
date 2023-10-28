@@ -6,6 +6,7 @@ import { HiLink, HiOutlineTrash } from 'react-icons/hi2';
 import { TCategory } from '@/types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import axios from 'axios';
 
 const CreatePostForm = () => {
    const [links, setLinks] = useState<string[]>([]);
@@ -21,9 +22,8 @@ const CreatePostForm = () => {
 
    useEffect(() => {
       const fetchAllCategories = async () => {
-         const res = await fetch('/api/categories');
-         const catName = await res.json();
-         setCategories(catName);
+         const res = await axios.get('/api/categories');
+         setCategories(res.data);
       };
       fetchAllCategories();
    }, []);
@@ -49,22 +49,17 @@ const CreatePostForm = () => {
       }
 
       try {
-         const res = await fetch('/api/posts', {
-            method: 'POST',
-            headers: {
-               'Content-type': 'application/json',
-            },
-            body: JSON.stringify({
-               title,
-               content,
-               links,
-               selectedCategory,
-               imageUrl,
-            }),
+         const res = await axios.post('/api/posts', {
+            title,
+            content,
+            links,
+            selectedCategory,
+            imageUrl,
          });
-         if (res.ok) {
-            toast.success('New post added.');
+         if (res.status === 200) {
+            router.refresh();
             router.push('/dashboard');
+            toast.success('New post added.');
          }
       } catch (error) {
          toast.error('Something went wrong.');

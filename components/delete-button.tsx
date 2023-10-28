@@ -1,6 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 interface DeleteButtonPros {
    postId: string;
@@ -14,14 +15,9 @@ const DeleteButton = ({ postId }: DeleteButtonPros) => {
 
       if (confirmed) {
          try {
-            const res = await fetch(`/api/posts/${postId}`, {
-               method: 'DELETE',
-               headers: {
-                  'Content-type': 'application/json',
-               },
-            });
+            const res = await axios.delete(`/api/posts/${postId}`);
 
-            if (res.ok) {
+            if (res.status === 200) {
                toast.success('Post deleted.');
                router.refresh();
             }

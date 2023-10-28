@@ -4,16 +4,14 @@ import { TPost } from '@/types';
 import { getServerSession } from 'next-auth';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import axios from 'axios';
 
 const getPosts = async (email: string) => {
    try {
-      const res = await fetch(
-         `${process.env.NEXTAUTH_URL}/api/authors/${email}`,
-         {
-            cache: 'no-store',
-         }
+      const res = await axios.get(
+         `${process.env.NEXTAUTH_URL}/api/authors/${email}`
       );
-      const { posts } = await res.json();
+      const { posts } = res.data;
 
       return posts;
    } catch (error) {
