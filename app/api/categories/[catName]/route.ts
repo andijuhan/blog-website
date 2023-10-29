@@ -6,7 +6,7 @@ export const GET = async (
    { params }: { params: { catName: string } }
 ) => {
    try {
-      const postByCategory = await prismadb.category.findMany({
+      const postByCategory = await prismadb.category.findUnique({
          where: {
             catName: params.catName,
          },

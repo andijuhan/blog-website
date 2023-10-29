@@ -1,30 +1,36 @@
-import CategoryList from '@/components/categori-list';
 import Post from '@/components/post';
 import { TPost } from '@/types';
+import { notFound } from 'next/navigation';
 
-const getPosts = async (): Promise<TPost[] | null> => {
+const getPosts = async (catName: string): Promise<TPost[] | null> => {
    try {
-      const res = await fetch(`${process.env.NEXTAUTH_URL}/api/posts`, {
-         next: {
-            revalidate: 1,
-         },
-      });
+      const res = await fetch(
+         `${process.env.NEXTAUTH_URL}/api/categories/${catName}`,
+         { next: { revalidate: 1 } }
+      );
       if (res.ok) {
-         const posts = await res.json();
+         const category = await res.json();
+
+         const posts = category.posts;
          return posts;
       }
    } catch (error) {
       console.log(error);
+      notFound();
    }
    return null;
 };
 
-export default async function Home() {
-   const posts = await getPosts();
+const CategoryPosts = async ({ params }: { params: { catName: string } }) => {
+   const catName = decodeURIComponent(params.catName);
+
+   const posts = await getPosts(catName);
 
    return (
       <>
-         <CategoryList />
+         <h1 className='mt-8 text-2xl font-bold'>
+            <span className='font-normal'>Category:</span> {catName}
+         </h1>
          {posts && posts.length > 0 ? (
             posts.map((post) => (
                <Post
@@ -45,4 +51,6 @@ export default async function Home() {
          )}
       </>
    );
-}
+};
+
+export default CategoryPosts;

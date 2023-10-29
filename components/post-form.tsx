@@ -3,20 +3,26 @@ import { HiPlus } from 'react-icons/hi2';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { HiLink, HiOutlineTrash } from 'react-icons/hi2';
-import { TCategory } from '@/types';
+import { TCategory, TPost } from '@/types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 
-const CreatePostForm = () => {
-   const [links, setLinks] = useState<string[]>([]);
+interface PostFormProps {
+   initialData?: TPost | null;
+}
+
+const PostForm = ({ initialData }: PostFormProps) => {
+   const [links, setLinks] = useState<string[]>(initialData?.links || []);
    const [linkInput, setLinkInput] = useState('');
-   const [title, setTitle] = useState('');
-   const [content, setContent] = useState('');
+   const [title, setTitle] = useState(initialData?.title || '');
+   const [content, setContent] = useState(initialData?.content || '');
    const [categories, setCategories] = useState<TCategory[]>([]);
-   const [selectedCategory, setSelectedCategory] = useState('');
-   const [imageUrl, setImageUrl] = useState('');
-   const [publicId, setPublicId] = useState('');
+   const [selectedCategory, setSelectedCategory] = useState(
+      initialData?.catName || ''
+   );
+   const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || '');
+   const [publicId, setPublicId] = useState(initialData?.publicId || '');
    const [error, setError] = useState('');
    const router = useRouter();
 
@@ -49,17 +55,31 @@ const CreatePostForm = () => {
       }
 
       try {
-         const res = await axios.post('/api/posts', {
-            title,
-            content,
-            links,
-            selectedCategory,
-            imageUrl,
-         });
-         if (res.status === 200) {
-            router.refresh();
-            router.push('/dashboard');
-            toast.success('New post added.');
+         if (initialData) {
+            const res = await axios.patch(`/api/posts/${initialData.id}`, {
+               title,
+               content,
+               links,
+               selectedCategory,
+            });
+            if (res.status === 200) {
+               router.refresh();
+               router.push('/dashboard');
+               toast.success('Post updated.');
+            }
+         } else {
+            const res = await axios.post('/api/posts', {
+               title,
+               content,
+               links,
+               selectedCategory,
+               imageUrl,
+            });
+            if (res.status === 200) {
+               router.refresh();
+               router.push('/dashboard');
+               toast.success('New post added.');
+            }
          }
       } catch (error) {
          toast.error('Something went wrong.');
@@ -115,6 +135,7 @@ const CreatePostForm = () => {
             <select
                onChange={(e) => setSelectedCategory(e.target.value)}
                className='p-3 rounded-md border appearance-none'
+               value={selectedCategory}
             >
                <option value=''>Select A Category</option>
                {categories &&
@@ -126,7 +147,7 @@ const CreatePostForm = () => {
             </select>
 
             <button className='primary-btn' type='submit'>
-               Create Post
+               {initialData ? 'Update Post' : 'Create Post'}
             </button>
             {error ? (
                <div className='p-3 text-red-500 font-bold'>{error}</div>
@@ -136,4 +157,4 @@ const CreatePostForm = () => {
    );
 };
 
-export default CreatePostForm;
+export default PostForm;

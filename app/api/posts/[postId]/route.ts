@@ -22,13 +22,13 @@ export const GET = async (
       });
 
       return NextResponse.json(post);
-   } catch (error) {
+   } catch (error: any) {
       console.log(error);
-      return new NextResponse('Something went wrong', { status: 500 });
+      return NextResponse.json({ message: error.message }, { status: 500 });
    }
 };
 
-export const PUT = async (
+export const PATCH = async (
    req: Request,
    { params }: { params: { postId: string } }
 ) => {

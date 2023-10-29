@@ -38,13 +38,20 @@ const Post = async ({
       year: 'numeric',
    };
    const formattedDate = dateObject.toLocaleDateString('en-US', options);
-   const contentReading = readingTime(content, 10);
+   const contentReading = readingTime(content, 150);
 
    return (
       <div className='my-4 py-8 border-b border-b-300'>
          <div className='mb-4'>
-            Posted by: <span className='font-bold'>{author}</span> on{' '}
-            {formattedDate} - {contentReading.words} words {contentReading.text}
+            {author ? (
+               <>
+                  Posted by: <span className='font-bold'>{author}</span> on{' '}
+                  {formattedDate}
+               </>
+            ) : (
+               <>Posted on {formattedDate} </>
+            )}
+            - {contentReading.words} words {contentReading.text}
          </div>
          <div className='w-full h-72 relative'>
             {thumbnail ? (
