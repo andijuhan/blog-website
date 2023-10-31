@@ -7,6 +7,9 @@ import { TCategory, TPost } from '@/types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
+import { CldUploadButton, CldUploadWidgetResults } from 'next-cloudinary';
+import { HiOutlinePhoto } from 'react-icons/hi2';
+import Image from 'next/image';
 
 interface PostFormProps {
    initialData?: TPost | null;
@@ -61,6 +64,8 @@ const PostForm = ({ initialData }: PostFormProps) => {
                content,
                links,
                selectedCategory,
+               imageUrl,
+               publicId,
             });
             if (res.status === 200) {
                router.refresh();
@@ -74,6 +79,7 @@ const PostForm = ({ initialData }: PostFormProps) => {
                links,
                selectedCategory,
                imageUrl,
+               publicId,
             });
             if (res.status === 200) {
                router.refresh();
@@ -84,6 +90,27 @@ const PostForm = ({ initialData }: PostFormProps) => {
       } catch (error) {
          toast.error('Something went wrong.');
          console.log(error);
+      }
+   };
+
+   const handleImageUpload = (result: CldUploadWidgetResults) => {
+      const info = result.info as object;
+
+      if ('secure_url' in info && 'public_id' in info) {
+         const url = info.secure_url as string;
+         const public_id = info.public_id as string;
+         setImageUrl(url);
+         setPublicId(public_id);
+      }
+   };
+
+   const removeImage = async (e: React.FormEvent) => {
+      e.preventDefault();
+      const res = await axios.post('/api/removeImage', { publicId });
+      if (res.status === 200) {
+         setImageUrl('');
+         setPublicId('');
+         toast.success('Image removed.');
       }
    };
 
@@ -132,6 +159,33 @@ const PostForm = ({ initialData }: PostFormProps) => {
                   Add
                </button>
             </div>
+            <CldUploadButton
+               uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+               className={`relative h-48 border-2 mt-4 border-dotted grid place-items-center bg-slate-100 rounded-md ${
+                  imageUrl && 'pointer-events-none'
+               }`}
+               onUpload={handleImageUpload}
+            >
+               <div>
+                  <HiOutlinePhoto size={30} />
+               </div>
+               {imageUrl && (
+                  <Image
+                     src={imageUrl}
+                     alt=''
+                     fill
+                     className='absolute object-contain inset-0'
+                  />
+               )}
+            </CldUploadButton>
+            {publicId && (
+               <button
+                  onClick={removeImage}
+                  className='py-2 px-4 rounded-md font-bold w-fit bg-red-600 text-white mb-4'
+               >
+                  Remove Image
+               </button>
+            )}
             <select
                onChange={(e) => setSelectedCategory(e.target.value)}
                className='p-3 rounded-md border appearance-none'

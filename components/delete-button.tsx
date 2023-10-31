@@ -10,6 +10,10 @@ interface DeleteButtonPros {
 const DeleteButton = ({ postId }: DeleteButtonPros) => {
    const router = useRouter();
 
+   const deleteImage = async (publicId: string) => {
+      const res = await axios.post('/api/removeImage', { publicId });
+   };
+
    const handleDelete = async () => {
       const confirmed = window.confirm('Delete this post?');
 
@@ -18,6 +22,8 @@ const DeleteButton = ({ postId }: DeleteButtonPros) => {
             const res = await axios.delete(`/api/posts/${postId}`);
 
             if (res.status === 200) {
+               const { publicId } = res.data;
+               await deleteImage(publicId);
                toast.success('Post deleted.');
                router.refresh();
             }

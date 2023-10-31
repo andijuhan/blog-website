@@ -78,13 +78,13 @@ export const DELETE = async (
    }
 
    try {
-      const updatedPost = await prismadb.post.delete({
+      const deletedPost = await prismadb.post.delete({
          where: {
             id: params.postId,
          },
       });
 
-      return NextResponse.json(updatedPost);
+      return NextResponse.json(deletedPost);
    } catch (error) {
       console.log(error);
       return new NextResponse('Something went wrong', { status: 500 });
