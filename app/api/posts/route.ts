@@ -12,6 +12,7 @@ export const GET = async () => {
                   name: true,
                },
             },
+            category: true,
          },
          orderBy: {
             createdAt: 'desc',
@@ -25,26 +26,54 @@ export const GET = async () => {
    }
 };
 
+/**
+ * Handles the POST request
+ *
+ * @param req The request object
+ * @returns The response object
+ */
 export const POST = async (req: Request) => {
+   // Get the session from the server
    const session = await getServerSession(authOptions);
 
+   // If there is no session, return an unauthenticated error
    if (!session) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
    }
 
-   const { title, content, links, selectedCategory, imageUrl, publicId } =
+   // Destructure the request body
+   const { title, slug, content, links, selectedCategory, imageUrl, publicId } =
       await req.json();
 
+   // Check for duplicate slug
+   const slugs = await prismadb.post.findMany({
+      where: {
+         slug,
+      },
+   });
+
+   // If there are duplicate slugs, return an error
+   if (slugs.length > 0) {
+      return NextResponse.json(
+         { message: 'Slug already exists' },
+         { status: 401 }
+      );
+   }
+
+   // Get the author's email from the session
    const authorEmail = session?.user?.email as string;
 
+   // Check if title or content is missing
    if (!title || !content) {
       return new NextResponse('Title & content are required', { status: 500 });
    }
 
    try {
+      // Create a new post in the database
       const newPost = await prismadb.post.create({
          data: {
             title,
+            slug,
             content,
             links,
             catName: selectedCategory,

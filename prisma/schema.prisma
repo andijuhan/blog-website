@@ -61,6 +61,7 @@ model VerificationToken {
 model Post {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
   title       String
+  slug        String
   content     String
   imageUrl    String?
   publicId    String?
@@ -76,6 +77,7 @@ model Post {
 model Category {
   id      String   @id @default(auto()) @map("_id") @db.ObjectId
   catName String   @unique
+  slug    String
   posts   Post[]
   postIDs String[] @db.ObjectId
 }

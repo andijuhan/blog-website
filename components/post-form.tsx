@@ -10,6 +10,7 @@ import axios from 'axios';
 import { CldUploadButton, CldUploadWidgetResults } from 'next-cloudinary';
 import { HiOutlinePhoto } from 'react-icons/hi2';
 import Image from 'next/image';
+import { createSlug, verifySlug } from '@/utils';
 
 interface PostFormProps {
    initialData?: TPost | null;
@@ -19,6 +20,7 @@ const PostForm = ({ initialData }: PostFormProps) => {
    const [links, setLinks] = useState<string[]>(initialData?.links || []);
    const [linkInput, setLinkInput] = useState('');
    const [title, setTitle] = useState(initialData?.title || '');
+   const [slug, setSlug] = useState(initialData?.slug || '');
    const [content, setContent] = useState(initialData?.content || '');
    const [categories, setCategories] = useState<TCategory[]>([]);
    const [selectedCategory, setSelectedCategory] = useState(
@@ -26,7 +28,6 @@ const PostForm = ({ initialData }: PostFormProps) => {
    );
    const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || '');
    const [publicId, setPublicId] = useState(initialData?.publicId || '');
-   const [error, setError] = useState('');
    const router = useRouter();
 
    useEffect(() => {
@@ -51,9 +52,15 @@ const PostForm = ({ initialData }: PostFormProps) => {
 
    const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
+      const verifiedSlug = verifySlug(slug);
+
+      if (!slug || !verifiedSlug) {
+         toast.error('Invalid slug');
+         return;
+      }
 
       if (!title || !content) {
-         setError('Title & content are require');
+         toast.error('Title & content are require');
          return;
       }
 
@@ -61,6 +68,7 @@ const PostForm = ({ initialData }: PostFormProps) => {
          if (initialData) {
             const res = await axios.patch(`/api/posts/${initialData.id}`, {
                title,
+               slug,
                content,
                links,
                selectedCategory,
@@ -75,6 +83,7 @@ const PostForm = ({ initialData }: PostFormProps) => {
          } else {
             const res = await axios.post('/api/posts', {
                title,
+               slug,
                content,
                links,
                selectedCategory,
@@ -87,9 +96,9 @@ const PostForm = ({ initialData }: PostFormProps) => {
                toast.success('New post added.');
             }
          }
-      } catch (error) {
-         toast.error('Something went wrong.');
-         console.log(error);
+      } catch (error: any) {
+         toast.error(error.response.data.message);
+         console.log(error.response.data.message);
       }
    };
 
@@ -114,15 +123,27 @@ const PostForm = ({ initialData }: PostFormProps) => {
       }
    };
 
+   const onTitleChange = (title: string) => {
+      setTitle(title);
+      const newSlug = createSlug(title);
+      setSlug(newSlug);
+   };
+
    return (
       <div>
          <h2 className='text-2xl font-bold my-4'>Create Post</h2>
          <form onSubmit={handleSubmit} className='flex flex-col gap-2'>
             <input
-               onChange={(e) => setTitle(e.target.value)}
+               onChange={(e) => onTitleChange(e.target.value)}
                value={title}
                type='text'
                placeholder='Title'
+            />
+            <input
+               onChange={(e) => setSlug(e.target.value)}
+               value={slug}
+               type='text'
+               placeholder='Slug'
             />
             <textarea
                onChange={(e) => setContent(e.target.value)}
@@ -203,9 +224,6 @@ const PostForm = ({ initialData }: PostFormProps) => {
             <button className='primary-btn' type='submit'>
                {initialData ? 'Update Post' : 'Create Post'}
             </button>
-            {error ? (
-               <div className='p-3 text-red-500 font-bold'>{error}</div>
-            ) : null}
          </form>
       </div>
    );

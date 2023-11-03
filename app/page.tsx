@@ -35,9 +35,11 @@ export default async function Home() {
                   thumbnail={post.imageUrl}
                   authorEmail={post.authorEmail}
                   title={post.title}
+                  slug={post.slug}
                   content={post.content}
                   links={post.links || []}
-                  category={post.catName}
+                  catName={post.category?.catName || ''}
+                  catSlug={post.category?.slug || ''}
                />
             ))
          ) : (

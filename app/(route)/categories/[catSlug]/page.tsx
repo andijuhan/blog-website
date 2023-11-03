@@ -2,37 +2,35 @@ import Post from '@/components/post';
 import { TPost } from '@/types';
 import { notFound } from 'next/navigation';
 
-const getPosts = async (catName: string): Promise<TPost[] | null> => {
+const getCategoryPosts = async (catSlug: string) => {
    try {
       const res = await fetch(
-         `${process.env.NEXTAUTH_URL}/api/categories/${catName}`,
-         { next: { revalidate: 1 } }
+         `${process.env.NEXTAUTH_URL}/api/categories/${catSlug}`,
+         { next: { revalidate: 0 } }
       );
       if (res.ok) {
          const category = await res.json();
 
-         const posts = category.posts;
-         return posts;
+         return category;
+      } else {
+         notFound();
       }
    } catch (error) {
-      console.log(error);
       notFound();
    }
-   return null;
 };
 
-const CategoryPosts = async ({ params }: { params: { catName: string } }) => {
-   const catName = decodeURIComponent(params.catName);
-
-   const posts = await getPosts(catName);
+const CategoryPosts = async ({ params }: { params: { catSlug: string } }) => {
+   const categoryPost = await getCategoryPosts(params.catSlug);
 
    return (
       <>
          <h1 className='mt-8 text-2xl font-bold'>
-            <span className='font-normal'>Category:</span> {catName}
+            <span className='font-normal'>Category:</span>{' '}
+            {categoryPost?.catName}
          </h1>
-         {posts && posts.length > 0 ? (
-            posts.map((post) => (
+         {categoryPost?.posts && categoryPost?.posts.length > 0 ? (
+            categoryPost.posts.map((post: TPost) => (
                <Post
                   key={post.id}
                   id={post.id}
@@ -41,9 +39,10 @@ const CategoryPosts = async ({ params }: { params: { catName: string } }) => {
                   thumbnail={post.imageUrl}
                   authorEmail={post.authorEmail}
                   title={post.title}
+                  slug={post.slug}
                   content={post.content}
                   links={post.links || []}
-                  category={post.catName}
+                  catName={post.catName}
                />
             ))
          ) : (

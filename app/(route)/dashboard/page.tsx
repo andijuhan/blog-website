@@ -50,7 +50,7 @@ const Dashboard = async () => {
                   title={post.title}
                   content={post.content}
                   links={post.links || []}
-                  category={post.catName}
+                  catName={post.catName}
                />
             ))
          ) : (

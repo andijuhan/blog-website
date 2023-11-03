@@ -23,7 +23,10 @@ const DeleteButton = ({ postId }: DeleteButtonPros) => {
 
             if (res.status === 200) {
                const { publicId } = res.data;
-               await deleteImage(publicId);
+               if (publicId) {
+                  await deleteImage(publicId);
+               }
+
                toast.success('Post deleted.');
                router.refresh();
             }

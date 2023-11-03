@@ -13,9 +13,11 @@ interface PostProps {
    thumbnail?: string;
    authorEmail?: string;
    title: string;
+   slug: string;
    content: string;
    links?: string[];
-   category?: string;
+   catName?: string;
+   catSlug?: string;
 }
 
 const Post = async ({
@@ -25,9 +27,11 @@ const Post = async ({
    thumbnail,
    authorEmail,
    title,
+   slug,
    content,
    links,
-   category,
+   catName,
+   catSlug,
 }: PostProps) => {
    const session = await getServerSession(authOptions);
    const isEditable = session && session?.user?.email === authorEmail;
@@ -70,15 +74,17 @@ const Post = async ({
                />
             )}
          </div>
-         {category && (
+         {catName && (
             <Link
                className='bg-slate-800 w-fit text-white px-4 py-0.5 text-sm font-bold rounded-md mt-4 block'
-               href={`/categories/${category}`}
+               href={`/categories/${catSlug}`}
             >
-               {category}
+               {catName}
             </Link>
          )}
-         <h2 className='text-2xl font-bold my-4'>{title}</h2>
+         <Link href={`/${slug}`}>
+            <h2 className='text-2xl font-bold my-4'>{title}</h2>
+         </Link>
          <p className='leading-loose line-clamp-3'>{content}</p>
          {links && (
             <div className='my-4 flex flex-col gap-3'>

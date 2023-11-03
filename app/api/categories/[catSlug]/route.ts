@@ -3,12 +3,12 @@ import { NextResponse } from 'next/server';
 
 export const GET = async (
    req: Request,
-   { params }: { params: { catName: string } }
+   { params }: { params: { catSlug: string } }
 ) => {
    try {
-      const postByCategory = await prismadb.category.findUnique({
+      const postByCategory = await prismadb.category.findFirst({
          where: {
-            catName: params.catName,
+            slug: params.catSlug,
          },
          include: {
             posts: {
@@ -26,9 +26,19 @@ export const GET = async (
          },
       });
 
+      if (!postByCategory) {
+         return NextResponse.json(
+            { message: 'No posts found' },
+            { status: 404 }
+         );
+      }
+
       return NextResponse.json(postByCategory);
    } catch (error) {
       console.log(error);
-      return new NextResponse('Something went wrong', { status: 500 });
+      return NextResponse.json(
+         { message: 'Something went wrong' },
+         { status: 500 }
+      );
    }
 };

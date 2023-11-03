@@ -24,7 +24,7 @@ const CategoryList = async () => {
                <Link
                   className='px-4 py-1 rounded-md bg-slate-800 text-white cursor-pointer'
                   key={category.id}
-                  href={`/categories/${category.catName}`}
+                  href={`/categories/${category.slug}`}
                >
                   {category.catName}
                </Link>
